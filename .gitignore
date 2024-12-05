@@ -1,0 +1,8 @@
+fbc/bin
+fbc/obj
+/debug
+*.user
+*.suo
+_ReSharper.*
+*.sln.cache
+/.vs
