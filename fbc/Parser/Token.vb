@@ -37,9 +37,10 @@ Public Class Token
         TOK_INT     ' 123
         TOK_REG     ' $4
         TOK_RESULT  ' ?ret
+        TOK_COLON   ' :
     End Enum
 
-    Public Shared Function Tokenize(Line As String) As IEnumerable(Of Token)
+    Public Shared Function Tokenize(Line As String, LocationFromColumn As Func(Of Integer, Location)) As IEnumerable(Of Token)
 
         'Create result
         Dim Result As New List(Of Token)
@@ -133,6 +134,13 @@ Public Class Token
                 Continue While
             End If
 
+            'Check if it's a colon
+            If CurrentChar = ":" Then
+                Result.Add(New Token(Column, TokenType.TOK_COLON))
+                Column += 1
+                Continue While
+            End If
+
             'Check if this is the word '?ret'
             If Line.Substring(Column).StartsWith("?ret") Then
                 Result.Add(New Token(Column, TokenType.TOK_RESULT))
@@ -141,7 +149,7 @@ Public Class Token
             End If
 
             'Throw error
-            Throw New Exception($"Invalid character '{CurrentChar}' at column {Column}")
+            Throw New SyntaxError(LocationFromColumn(Column), $"Invalid character '{CurrentChar}' at column {Column}")
 
         End While
 

@@ -1,8 +1,3 @@
-Imports System
-Imports System.Data
-Imports System.Reflection.Metadata.Ecma335
-Imports fbc.FlowByte
-
 Module Program
 
     'Main input
@@ -135,7 +130,7 @@ Module Program
         End If
 
         'Read the file
-        Dim File As File = File.LoadBinary(Input)
+        Dim File As FlowByte.File = FlowByte.File.LoadBinary(Input)
 
         'Write the file to the string
         Console.WriteLine(File)

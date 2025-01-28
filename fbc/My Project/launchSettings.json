@@ -3,7 +3,7 @@
     "fbc": {
       "commandName": "Project",
       "commandLineArgs": "test.txt test.bin",
-      "workingDirectory": "C:\\Users\\gemin\\Documents\\fbc\\debug"
+      "workingDirectory": "../debug"
     }
   }
 }

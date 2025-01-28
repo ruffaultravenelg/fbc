@@ -4,7 +4,6 @@ Imports System.Text
 Public Class TokenLine
     Implements ILocated
 
-    Public ReadOnly Property IndentationLever As Integer
     Public ReadOnly Property Location As Location Implements ILocated.Location
     Public ReadOnly Property Tokens As IEnumerable(Of Token)
 
@@ -14,14 +13,8 @@ Public Class TokenLine
         'Set location
         Me.Location = New Location(Filename, LinePosition)
 
-        'Get indentation level
-        IndentationLever = 0
-        While IndentationLever < Line.Length AndAlso Char.IsWhiteSpace(Line(IndentationLever))
-            IndentationLever += 1
-        End While
-
         'Get tokens from the string
-        Me.Tokens = Token.Tokenize(Line)
+        Me.Tokens = Token.Tokenize(Line, Function(Column As Integer) New Location(Filename, LinePosition, Column))
 
         'Set parent of tokens
         For Each Token As Token In Tokens
@@ -45,10 +38,10 @@ Public Class TokenLine
         Do Until StreamReader.EndOfStream
 
             'Read line
-            Dim Line As String = StreamReader.ReadLine()
+            Dim Line As String = StreamReader.ReadLine().Trim()
 
             'Pass if empty or comment
-            If Line.Trim() = "" Or Line.Trim().StartsWith(";;") Then
+            If Line = "" Or Line.StartsWith(";") Then
                 Continue Do
             End If
 

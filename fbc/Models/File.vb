@@ -1,6 +1,4 @@
-﻿Imports System.Diagnostics.CodeAnalysis
-Imports System.Diagnostics.Eventing
-Imports System.IO
+﻿Imports System.IO
 Imports System.Text
 
 Namespace FlowByte
@@ -30,7 +28,10 @@ Namespace FlowByte
             Dim Stream As New FileStream(Path, FileMode.Create)
             Dim Writer As New BinaryWriter(Stream)
 
-            'Write version
+            'Write binary signature
+            Writer.Write(Config.Binary_Signature.ToCharArray())
+
+            'Write manifest version
             Writer.Write(Convert.ToDouble(Config.Version))
 
             'Write function count
@@ -59,10 +60,15 @@ Namespace FlowByte
             Dim Stream As New FileStream(Path, FileMode.Open)
             Dim Reader As New BinaryReader(Stream)
 
+            'Check signature
+            If Reader.ReadChars(Config.Binary_Signature.Length) <> Config.Binary_Signature Then
+                Throw New SimpleError($"""{IO.Path.GetRelativePath(".", Path)}"" isn't a FlowByte Binary file.")
+            End If
+
             'Read version
             Dim Version As Double = Reader.ReadDouble()
             If Version <> Config.Version Then
-                Throw New Exception("Invalid version")
+                Throw New SimpleError("Invalid version")
             End If
 
             'Create file

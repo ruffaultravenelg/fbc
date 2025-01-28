@@ -5,8 +5,8 @@ Namespace FlowByte
         Implements FlowByte.ISerializable
 
         'Values
-        Private Type As FlowByte.ArgumentType
-        Private Value As UInt32
+        Protected Type As FlowByte.ArgumentType
+        Protected Value As UInt32
 
         'Constructor
         Public Sub New(Type As FlowByte.ArgumentType, Optional Value As UInt32 = 0)
@@ -16,7 +16,7 @@ Namespace FlowByte
 
         'Serialize
 
-        Public Sub Serialize(Writer As BinaryWriter) Implements ISerializable.Serialize
+        Private Sub Serialize(Writer As BinaryWriter) Implements ISerializable.Serialize
 
             'Convert and writer type
             Dim TypeInteger As UInt32 = Type
@@ -25,6 +25,29 @@ Namespace FlowByte
             'Write value
             Writer.Write(Value)
 
+        End Sub
+
+        'Serialize null
+        Private Shared Sub SerializeNull(Writer As BinaryWriter)
+
+            'Create constant cause vbnet
+            Const NullValue As UInt32 = 0
+
+            'Write null type
+            Writer.Write(NullValue)
+
+            'Write null value
+            Writer.Write(NullValue)
+
+        End Sub
+
+        'Serialize a value
+        Public Shared Sub Serialize(Writer As BinaryWriter, Value As FlowByte.Value)
+            If Value Is Nothing Then
+                FlowByte.Value.SerializeNull(Writer)
+            Else
+                Value.Serialize(Writer)
+            End If
         End Sub
 
         'Deserialize
@@ -46,13 +69,16 @@ Namespace FlowByte
 
             Select Case Type
 
+                Case ArgumentType.ARG_NULL
+                    Return ""
+
                 Case ArgumentType.ARG_INT
                     Return Value.ToString()
 
                 Case ArgumentType.ARG_REG
                     Return "$" & Value.ToString()
 
-                Case ArgumentType.ARG_REG
+                Case ArgumentType.ARG_RET
                     Return "?ret"
 
                 Case Else
@@ -62,12 +88,17 @@ Namespace FlowByte
 
         End Function
 
+        'Resolve labels names to offsets
+        Public Overridable Sub ResolveLabels(Fn As FlowByte.Function)
+        End Sub
+
     End Class
 
     Public Enum ArgumentType
-        ARG_INT ' 42
-        ARG_REG ' $42
-        ARG_RET ' ?ret
+        ARG_NULL ' No value
+        ARG_INT  ' 42
+        ARG_REG  ' $42
+        ARG_RET  ' ?ret
     End Enum
 
 End Namespace

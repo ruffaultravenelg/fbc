@@ -10,11 +10,9 @@
         End If
         Enumerator = source.GetEnumerator()
 
-
         Enumerator.MoveNext()
         LastValue = Enumerator.Current
         _HasNext = Enumerator.MoveNext()
-
 
     End Sub
 
