@@ -7,3 +7,4 @@ build/
 _ReSharper.*
 *.sln.cache
 /.vs
+fbc/My Project/

@@ -1,5 +1,5 @@
 ﻿Namespace FlowByte
-    Public Module Types
+    Public Module Consts
 
         'Instruction types
         Public Enum InstructionType
@@ -25,6 +25,12 @@
             ARG_RET  ' ?ret
             ARG_FUN  ' Function index -> {0, 1, 2} can be changed when importing the file
         End Enum
+
+        'Interupts
+        Public Interupts As New Dictionary(Of String, Integer) From {
+            {"PUTC", 0},
+            {"PUTI", 1}
+        }
 
     End Module
 

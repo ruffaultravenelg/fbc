@@ -1,5 +1,4 @@
-﻿Imports System.Data
-Imports fbc.Token
+﻿Imports fbc.Token
 
 Public Class Parser
 
@@ -77,6 +76,9 @@ Public Class Parser
         'If token is a label name
         If Tokens.Current.Type = TokenType.TOK_WORD Then
             Tokens.NextIfPossible()
+            If FlowByte.Consts.Interupts.ContainsKey(Tok.Value) Then
+                Return New FlowByte.Value(FlowByte.Consts.ArgumentType.ARG_INT, FlowByte.Consts.Interupts(Tok.Value))
+            End If
             Return New FlowByte.NamedValue(Tok.Location, Tok.Value)
         End If
 

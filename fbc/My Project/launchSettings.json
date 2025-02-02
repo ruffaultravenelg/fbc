@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "fbc": {
-      "commandName": "Project",
-      "commandLineArgs": "test.bin --read",
-      "workingDirectory": "../debug"
-    }
-  }
-}
