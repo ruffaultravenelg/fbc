@@ -1,5 +1,6 @@
 fbc/bin
 fbc/obj
+build/
 /debug
 *.user
 *.suo
