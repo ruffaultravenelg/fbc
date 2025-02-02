@@ -12,7 +12,10 @@ Module Program
     Public Flags As New Dictionary(Of String, Boolean) From {
         {"-r", False},
         {"-h", False},
-        {"-v", False}
+        {"-v", False},
+        {"--help", False},
+        {"--version", False},
+        {"--read", False}
     }
 
     'Main
@@ -26,19 +29,19 @@ Module Program
             Next
 
             'Help
-            If Flags("-h") Then
+            If Flags("-h") OrElse Flags("--help") Then
                 DisplayHelp()
                 End
             End If
 
             'Version
-            If Flags("-v") Then
+            If Flags("-v") OrElse Flags("--version") Then
                 DisplayVersion()
                 End
             End If
 
             'Read
-            If Flags("-r") Then
+            If Flags("-r") OrElse Flags("--read") Then
                 ReadFile()
                 End
             End If
@@ -117,7 +120,7 @@ Module Program
 
     'Display version
     Private Sub DisplayVersion()
-        Console.WriteLine("FlowByte Compiler (fbc) version " & Config.Version.ToString())
+        Console.WriteLine("FlowByte Compiler (fbc) version " & Config.Version)
     End Sub
 
     'Read file
@@ -133,7 +136,7 @@ Module Program
         Dim File As FlowByte.File = FlowByte.File.LoadBinary(Input)
 
         'Write the file to the string
-        Console.WriteLine(File)
+        Console.WriteLine(File.ToString())
 
     End Sub
 

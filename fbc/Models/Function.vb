@@ -10,11 +10,13 @@ Namespace FlowByte
         Private ReadOnly ArgsCount As UInt32
         Private ReadOnly Instructions As IEnumerable(Of FlowByte.Instruction) = New List(Of FlowByte.Instruction)
         Public ReadOnly Labels As New Dictionary(Of String, UInt32)
+        Public ReadOnly Pub As Boolean
 
         'Constructor
-        Public Sub New(Name As String, ArgsCount As UInt32)
+        Public Sub New(Name As String, ArgsCount As UInt32, Pub As Boolean)
             Me.Name = Name
             Me.ArgsCount = ArgsCount
+            Me.Pub = Pub
         End Sub
 
         'Append instruction
@@ -35,10 +37,10 @@ Namespace FlowByte
 
         End Sub
 
-        'Resolve (resolve aspects where the functions needs to be complete like labels)
-        Public Sub Resolve()
+        'Travel action
+        Public Sub TravelNamedValue(Action As Action(Of FlowByte.NamedValue))
             For Each Instruction As FlowByte.Instruction In Instructions
-                Instruction.Resolve(Me)
+                Instruction.TravelNamedValue(Action)
             Next
         End Sub
 
@@ -48,6 +50,9 @@ Namespace FlowByte
             'Write function name
             Writer.Write(Convert.ToUInt32(Name.Length))
             Writer.Write(Name.ToCharArray())
+
+            'Write public
+            Writer.Write(Pub)
 
             'Write argument count
             Writer.Write(ArgsCount)
@@ -69,11 +74,14 @@ Namespace FlowByte
             Dim NameLength As UInt32 = Reader.ReadUInt32()
             Dim Name As String = New String(Reader.ReadChars(NameLength))
 
+            'Read public
+            Dim Pub As Boolean = Reader.ReadBoolean()
+
             'Read argument count
             Dim ArgsCount As UInt32 = Reader.ReadUInt32()
 
             'Create function
-            Dim Result As New FlowByte.Function(Name, ArgsCount)
+            Dim Result As New FlowByte.Function(Name, ArgsCount, Pub)
 
             'Read instructions
             Dim InstructionsCount As UInt32 = Reader.ReadUInt32()

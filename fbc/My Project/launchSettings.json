@@ -2,7 +2,7 @@
   "profiles": {
     "fbc": {
       "commandName": "Project",
-      "commandLineArgs": "test.txt test.bin",
+      "commandLineArgs": "test.bin --read",
       "workingDirectory": "../debug"
     }
   }

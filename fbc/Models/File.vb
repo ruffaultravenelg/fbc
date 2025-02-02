@@ -1,21 +1,36 @@
 ﻿Imports System.IO
+Imports System.Runtime.InteropServices
 Imports System.Text
 
 Namespace FlowByte
     Public Class File
 
         'List of functions
-        Private Functions As IDictionary(Of String, FlowByte.Function)
+        Private Functions As New List(Of FlowByte.Function)
 
         'Constructor
         Private Sub New()
-            Me.Functions = New Dictionary(Of String, FlowByte.Function)
         End Sub
+
+        'Search function
+        Public Function SearchFunction(Name As String) As FlowByte.Function
+            For Each Fun As FlowByte.Function In Functions
+                If Fun.Name = Name Then
+                    Return Fun
+                End If
+            Next
+            Return Nothing
+        End Function
+
+        'Get function index
+        Public Function GetFunctionIndex(Fun As FlowByte.Function) As Integer
+            Return Functions.IndexOf(Fun)
+        End Function
 
         'Append function
         Public Sub AppendFunction(Fun As FlowByte.Function)
             Try
-                Me.Functions.Add(Fun.Name, Fun)
+                Me.Functions.Add(Fun)
             Catch ex As ArgumentException
                 Throw New SyntaxError(Nothing, "A function nammed """ & Fun.Name & """ already exists")
             End Try
@@ -29,16 +44,19 @@ Namespace FlowByte
             Dim Writer As New BinaryWriter(Stream)
 
             'Write binary signature
-            Writer.Write(Config.Binary_Signature.ToCharArray())
+            Writer.Write(Config.BinarySignature.ToCharArray())
 
             'Write manifest version
-            Writer.Write(Convert.ToDouble(Config.Version))
+            Writer.Write(Config.ManifestVersion)
+
+            'Write entry point (function index)
+            Writer.Write(Convert.ToUInt32(0))
 
             'Write function count
             Writer.Write(Convert.ToUInt32(Functions.Count))
 
             'Write functions
-            For Each Fun As FlowByte.ISerializable In Functions.Values
+            For Each Fun As FlowByte.ISerializable In Functions
                 Fun.Serialize(Writer)
             Next
 
@@ -61,7 +79,7 @@ Namespace FlowByte
             Dim Reader As New BinaryReader(Stream)
 
             'Check signature
-            If Reader.ReadChars(Config.Binary_Signature.Length) <> Config.Binary_Signature Then
+            If Reader.ReadChars(Config.BinarySignature.Length) <> Config.BinarySignature Then
                 Throw New SimpleError($"""{IO.Path.GetRelativePath(".", Path)}"" isn't a FlowByte Binary file.")
             End If
 
@@ -70,6 +88,9 @@ Namespace FlowByte
             If Version <> Config.Version Then
                 Throw New SimpleError("Invalid version")
             End If
+
+            'Read entry point
+            Dim EntryPoint As UInt32 = Reader.ReadUInt32()
 
             'Create file
             Dim File As New FlowByte.File()
@@ -108,6 +129,11 @@ Namespace FlowByte
             'Parse token
             Parser.Parse(File, Lines)
 
+            'Resolve functions names
+            For Each Fun As FlowByte.Function In File.Functions
+                Fun.TravelNamedValue(FlowByte.NamedValue.GenerateResolveFunctionName(File))
+            Next
+
             'Return file
             Return File
 
@@ -120,7 +146,7 @@ Namespace FlowByte
             Dim Result As New StringBuilder()
 
             'Add each functions
-            For Each Fun In Functions.Values
+            For Each Fun In Functions
                 Result.Append(Fun.ToString())
                 Result.Append(Environment.NewLine)
             Next

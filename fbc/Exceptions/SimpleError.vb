@@ -1,7 +1,7 @@
 ﻿Public Class SimpleError
     Inherits DisplayableError
 
-    Private Message As String
+    Private Shadows Message As String
 
     Public Sub New(Message As String)
         Me.Message = Message

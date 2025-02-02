@@ -28,13 +28,24 @@ Public Class Token
     End Sub
 
     Public Enum TokenType
-        TOK_DEF     ' def
-        TOK_MOV     ' mov
-        TOK_RET     ' ret
+        TOK_KEYWORD_PUB     ' pub
+        TOK_KEYWORD_DEF     ' def
+        TOK_KEYWORD_MOV     ' mov
+        TOK_KEYWORD_ARG     ' arg
+        TOK_KEYWORD_CALL    ' call
+        TOK_KEYWORD_INT     ' int
+        TOK_KEYWORD_RET     ' ret
+        TOK_KEYWORD_RETVAL  ' retval
+        TOK_KEYWORD_INC     ' inc
+        TOK_KEYWORD_DEC     ' dec
+        TOK_KEYWORD_JMP     ' jmp
+        TOK_KEYWORD_JMPIF   ' jmpif
+        TOK_KEYWORD_EQU     ' equ
+        TOK_KEYWORD_NOT     ' not
         TOK_COMMA   ' ,
         TOK_WORD    ' word
         TOK_CHAR    ' 'h'
-        TOK_INT     ' 123
+        TOK_I32     ' 123
         TOK_REG     ' $4
         TOK_RESULT  ' ?ret
         TOK_COLON   ' :
@@ -69,16 +80,12 @@ Public Class Token
                 End While
 
                 'Check if it's a keyword
-                Select Case Word.ToLower()
-                    Case "def"
-                        Result.Add(New Token(Column, TokenType.TOK_DEF))
-                    Case "ret"
-                        Result.Add(New Token(Column, TokenType.TOK_RET))
-                    Case "mov"
-                        Result.Add(New Token(Column, TokenType.TOK_MOV))
-                    Case Else
-                        Result.Add(New Token(Column, TokenType.TOK_WORD, Word))
-                End Select
+                Dim TokenTypeValue As TokenType
+                If [Enum].TryParse("TOK_KEYWORD_" & Word.ToUpper(), TokenTypeValue) Then
+                    Result.Add(New Token(Column, TokenTypeValue))
+                Else
+                    Result.Add(New Token(Column, TokenType.TOK_WORD, Word))
+                End If
 
                 Continue While
 
@@ -94,7 +101,7 @@ Public Class Token
                     Column += 1
                 End While
 
-                Result.Add(New Token(Column, TokenType.TOK_INT, Integer.Parse(Number, CultureInfo.InvariantCulture)))
+                Result.Add(New Token(Column, TokenType.TOK_I32, Integer.Parse(Number, CultureInfo.InvariantCulture)))
                 Continue While
 
             End If
@@ -118,11 +125,58 @@ Public Class Token
             'Check if it's a character
             If CurrentChar = "'" Then
 
-                'Get character
-                Dim Character As Char = Line(Column + 1)
-                Result.Add(New Token(Column, TokenType.TOK_CHAR, Character))
+                'Next character
+                Column += 1
+                If Not Column < Line.Length Then
+                    Throw New SyntaxError(LocationFromColumn(Column), "Unexpected end of line")
+                End If
 
-                Column += 3
+                'Get character
+                Dim Character As Char = Line(Column)
+                Column += 1
+                If Not Column < Line.Length Then
+                    Throw New SyntaxError(LocationFromColumn(Column), "Unexpected end of line")
+                End If
+
+                'End
+                If Line(Column) = "'" Then
+                    Result.Add(New Token(Column, TokenType.TOK_CHAR, Character))
+                    Column += 1
+                    Continue While
+                End If
+
+                'Not special caracter
+                If Not Character = "\" Then
+                    Throw New SyntaxError(LocationFromColumn(Column), "Invalid character")
+                End If
+
+                'Special character
+                Select Case Line(Column)
+                    Case "n"c
+                        Result.Add(New Token(Column, TokenType.TOK_CHAR, Chr(10)))
+                    Case "r"c
+                        Result.Add(New Token(Column, TokenType.TOK_CHAR, Chr(14)))
+                    Case "t"c
+                        Result.Add(New Token(Column, TokenType.TOK_CHAR, Chr(9)))
+                    Case "'"c
+                        Result.Add(New Token(Column, TokenType.TOK_CHAR, "'"c))
+                    Case "\"c
+                        Result.Add(New Token(Column, TokenType.TOK_CHAR, "\"c))
+                    Case Else
+                        Throw New SyntaxError(LocationFromColumn(Column), "Invalid character")
+                End Select
+
+                'Search for end car
+                Column += 1
+                If Not Column < Line.Length Then
+                    Throw New SyntaxError(LocationFromColumn(Column), "Unexpected end of line")
+                End If
+
+                If Not Line(Column) = "'" Then
+                    Throw New SyntaxError(LocationFromColumn(Column), "Invalid character")
+                End If
+
+                Column += 1
                 Continue While
 
             End If

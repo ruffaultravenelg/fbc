@@ -10,7 +10,18 @@ Public Class Parser
 
     'Instructions forms
     Private ReadOnly InstructionArgumentCount As New Dictionary(Of TokenType, (ArgumentCount As Integer, Instruction As FlowByte.InstructionType)) From {
-        {FlowByte.InstructionType.INST_MOV, (2, FlowByte.InstructionType.INST_MOV)}
+        {TokenType.TOK_KEYWORD_ARG, (1, FlowByte.InstructionType.INST_ARG)},
+        {TokenType.TOK_KEYWORD_CALL, (1, FlowByte.InstructionType.INST_CALL)},
+        {TokenType.TOK_KEYWORD_INT, (1, FlowByte.InstructionType.INST_INT)},
+        {TokenType.TOK_KEYWORD_MOV, (2, FlowByte.InstructionType.INST_MOV)},
+        {TokenType.TOK_KEYWORD_RET, (0, FlowByte.InstructionType.INST_RET)},
+        {TokenType.TOK_KEYWORD_RETVAL, (1, FlowByte.InstructionType.INST_RETVAL)},
+        {TokenType.TOK_KEYWORD_INC, (1, FlowByte.InstructionType.INST_INC)},
+        {TokenType.TOK_KEYWORD_DEC, (1, FlowByte.InstructionType.INST_DEC)},
+        {TokenType.TOK_KEYWORD_JMP, (1, FlowByte.InstructionType.INST_JMP)},
+        {TokenType.TOK_KEYWORD_JMPIF, (2, FlowByte.InstructionType.INST_JMPIF)},
+        {TokenType.TOK_KEYWORD_EQU, (2, FlowByte.InstructionType.INST_EQU)},
+        {TokenType.TOK_KEYWORD_NOT, (1, FlowByte.InstructionType.INST_NOT)}
     }
 
     'Constructor
@@ -46,10 +57,9 @@ Public Class Parser
         End If
 
         'If token is a number
-        If Tokens.Current.Type = TokenType.TOK_INT Then
+        If Tokens.Current.Type = TokenType.TOK_I32 Then
             Tokens.NextIfPossible()
-            Return New FlowByte.Value(FlowByte.ArgumentType.ARG_INT, Convert.ToUInt32(Tok.Value))
-
+            Return New FlowByte.Value(FlowByte.ArgumentType.ARG_INT, Convert.ToInt32(Tok.Value))
         End If
 
         'If token is a result value
@@ -58,10 +68,16 @@ Public Class Parser
             Return New FlowByte.Value(FlowByte.ArgumentType.ARG_RET)
         End If
 
+        'If token is a char
+        If Tokens.Current.Type = TokenType.TOK_CHAR Then
+            Tokens.NextIfPossible()
+            Return New FlowByte.Value(FlowByte.ArgumentType.ARG_INT, Convert.ToInt32(DirectCast(Tok.Value, Char)))
+        End If
+
         'If token is a label name
         If Tokens.Current.Type = TokenType.TOK_WORD Then
             Tokens.NextIfPossible()
-            Return New FlowByte.LabelValue(Tok.Location, Tok.Value)
+            Return New FlowByte.NamedValue(Tok.Location, Tok.Value)
         End If
 
         'Throw error
@@ -116,6 +132,11 @@ Public Class Parser
 
         End If
 
+        'If there is something else
+        If Tokens.HasNext Then
+            Throw New SyntaxError(Tokens.Current.Location, "This instruction doesn't need anything more.")
+        End If
+
         'Return object
         Return New FlowByte.Instruction(InstructionInformations.Instruction, Argument1, Argument2)
 
@@ -154,9 +175,21 @@ Public Class Parser
     'Parse function
     Private Function GetFunction() As FlowByte.Function
 
-        'Get "def" keyword
+        'Get line tokens
         EnterLine()
-        If Tokens.Current.Type <> TokenType.TOK_DEF Then
+
+        'Get "pub" keyword
+        Dim Pub As Boolean = False
+        If Tokens.Current.Type = TokenType.TOK_KEYWORD_PUB Then
+            Pub = True
+            If Not Tokens.HasNext Then
+                Throw New SyntaxError(Tokens.Current.Location, "A ""def"" keyword was expected after ""pub"".")
+            End If
+            Tokens.Next()
+        End If
+
+        'Get "def" keyword
+        If Tokens.Current.Type <> TokenType.TOK_KEYWORD_DEF Then
             Throw New SyntaxError(Tokens.Current.Location, "Keyword 'def' was expected")
         End If
 
@@ -171,13 +204,14 @@ Public Class Parser
         Dim ArgumentCount As Integer = 0
         If Tokens.HasNext Then
             Tokens.Next()
-            If Tokens.Current.Type <> TokenType.TOK_INT Then
+            If Tokens.Current.Type <> TokenType.TOK_I32 Then
                 Throw New SyntaxError(Tokens.Current.Location, "Expected a integer")
             End If
+            ArgumentCount = Convert.ToInt32(Tokens.Current.Value)
         End If
 
         'Create function
-        Dim Fn As New FlowByte.Function(Name, ArgumentCount)
+        Dim Fn As New FlowByte.Function(Name, ArgumentCount, Pub)
 
         'Parse function body
         While Lines.HasNext
@@ -187,7 +221,7 @@ Public Class Parser
             EnterLine()
 
             'Check if the line defines a new functions
-            If Tokens.Current.Type = TokenType.TOK_DEF Then
+            If {TokenType.TOK_KEYWORD_DEF, TokenType.TOK_KEYWORD_PUB}.Contains(Tokens.Current.Type) Then
                 Exit While
             End If
 
@@ -203,7 +237,7 @@ Public Class Parser
         End While
 
         'Resolve label names
-        Fn.Resolve()
+        Fn.TravelNamedValue(FlowByte.NamedValue.GenerateResolveLabelFunction(Fn))
 
         'Return function
         Return Fn

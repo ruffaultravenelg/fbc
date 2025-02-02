@@ -5,8 +5,8 @@ Namespace FlowByte
         Implements FlowByte.ISerializable
 
         'Values
-        Protected Type As FlowByte.ArgumentType
-        Protected Value As UInt32
+        Public Type As FlowByte.ArgumentType
+        Protected Value As Int32
 
         'Constructor
         Public Sub New(Type As FlowByte.ArgumentType, Optional Value As UInt32 = 0)
@@ -19,7 +19,7 @@ Namespace FlowByte
         Private Sub Serialize(Writer As BinaryWriter) Implements ISerializable.Serialize
 
             'Convert and writer type
-            Dim TypeInteger As UInt32 = Type
+            Dim TypeInteger As Int32 = Type
             Writer.Write(TypeInteger)
 
             'Write value
@@ -31,7 +31,7 @@ Namespace FlowByte
         Private Shared Sub SerializeNull(Writer As BinaryWriter)
 
             'Create constant cause vbnet
-            Const NullValue As UInt32 = 0
+            Const NullValue As Int32 = 0
 
             'Write null type
             Writer.Write(NullValue)
@@ -81,6 +81,9 @@ Namespace FlowByte
                 Case ArgumentType.ARG_RET
                     Return "?ret"
 
+                Case ArgumentType.ARG_FUN
+                    Return "fun_idx:" & Value.ToString()
+
                 Case Else
                     Throw New NotImplementedException()
 
@@ -88,17 +91,6 @@ Namespace FlowByte
 
         End Function
 
-        'Resolve labels names to offsets
-        Public Overridable Sub ResolveLabels(Fn As FlowByte.Function)
-        End Sub
-
     End Class
-
-    Public Enum ArgumentType
-        ARG_NULL ' No value
-        ARG_INT  ' 42
-        ARG_REG  ' $42
-        ARG_RET  ' ?ret
-    End Enum
 
 End Namespace

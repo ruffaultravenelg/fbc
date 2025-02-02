@@ -18,17 +18,21 @@ Namespace FlowByte
             Me.Argument2 = Argument2
         End Sub
 
-        'Resolve
-        Public Sub Resolve(Fn As FlowByte.Function)
-            Argument1?.ResolveLabels(Fn)
-            Argument2?.ResolveLabels(Fn)
+        'Traval values
+        Public Sub TravelNamedValue(Action As Action(Of FlowByte.NamedValue))
+            If FlowByte.NamedValue.ShouldResolve(Argument1) Then
+                Action(Argument1)
+            End If
+            If FlowByte.NamedValue.ShouldResolve(Argument2) Then
+                Action(Argument2)
+            End If
         End Sub
 
         'Serialize
         Private Sub CommonSerialization(Writer As BinaryWriter) Implements ISerializable.Serialize
 
             'Write instruction type
-            Dim InstructionTypeConverted As UInt32 = InstructionType
+            Dim InstructionTypeConverted As Int32 = InstructionType
             Writer.Write(InstructionTypeConverted)
 
             'Write first argument
@@ -51,7 +55,7 @@ Namespace FlowByte
             Result = Result.ToLower()
 
             'If not argument
-            If Argument1 Is Nothing Then
+            If Argument1 Is Nothing OrElse Argument1.Type = FlowByte.ArgumentType.ARG_NULL Then
                 Return Result
             End If
 
@@ -59,7 +63,7 @@ Namespace FlowByte
             Result &= " " & Argument1.ToString()
 
             'If no other arguments
-            If Argument2 Is Nothing Then
+            If Argument2 Is Nothing OrElse Argument2.Type = FlowByte.ArgumentType.ARG_NULL Then
                 Return Result
             End If
 
@@ -73,7 +77,7 @@ Namespace FlowByte
         Public Shared Function Deserialize(Reader As BinaryReader) As Instruction
 
             'Read instruction type
-            Dim InstructionType As FlowByte.InstructionType = Reader.ReadUInt32()
+            Dim InstructionType As FlowByte.InstructionType = Reader.ReadInt32()
 
             'Deserialize arguments
             Dim Argument1 As FlowByte.Value = FlowByte.Value.Deserialize(Reader)
@@ -85,10 +89,5 @@ Namespace FlowByte
         End Function
 
     End Class
-
-    Public Enum InstructionType
-        INST_CALL
-        INST_MOV
-    End Enum
 
 End Namespace
