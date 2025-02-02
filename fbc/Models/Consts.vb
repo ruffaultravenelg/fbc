@@ -15,6 +15,15 @@
             INST_JMPIF
             INST_EQU
             INST_NOT
+            INST_LT
+            INST_GT
+            INST_LTE
+            INST_GTE
+            INST_ADD
+            INST_SUB
+            INST_MUL
+            INST_DIV
+            INST_MOD
         End Enum
 
         'Value types

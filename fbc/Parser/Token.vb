@@ -42,6 +42,15 @@ Public Class Token
         TOK_KEYWORD_JMPIF   ' jmpif
         TOK_KEYWORD_EQU     ' equ
         TOK_KEYWORD_NOT     ' not
+        TOK_KEYWORD_LT      ' lt
+        TOK_KEYWORD_GT      ' gt
+        TOK_KEYWORD_LTE     ' lte
+        TOK_KEYWORD_GTE     ' gte
+        TOK_KEYWORD_ADD     ' add
+        TOK_KEYWORD_SUB     ' sub
+        TOK_KEYWORD_MUL     ' mul
+        TOK_KEYWORD_DIV     ' div
+        TOK_KEYWORD_MOD     ' mod
         TOK_COMMA   ' ,
         TOK_WORD    ' word
         TOK_CHAR    ' 'h'

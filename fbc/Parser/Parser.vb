@@ -20,7 +20,16 @@ Public Class Parser
         {TokenType.TOK_KEYWORD_JMP, (1, FlowByte.InstructionType.INST_JMP)},
         {TokenType.TOK_KEYWORD_JMPIF, (2, FlowByte.InstructionType.INST_JMPIF)},
         {TokenType.TOK_KEYWORD_EQU, (2, FlowByte.InstructionType.INST_EQU)},
-        {TokenType.TOK_KEYWORD_NOT, (1, FlowByte.InstructionType.INST_NOT)}
+        {TokenType.TOK_KEYWORD_NOT, (1, FlowByte.InstructionType.INST_NOT)},
+        {TokenType.TOK_KEYWORD_LT, (2, FlowByte.InstructionType.INST_LT)},
+        {TokenType.TOK_KEYWORD_GT, (2, FlowByte.InstructionType.INST_GT)},
+        {TokenType.TOK_KEYWORD_LTE, (2, FlowByte.InstructionType.INST_LTE)},
+        {TokenType.TOK_KEYWORD_GTE, (2, FlowByte.InstructionType.INST_GTE)},
+        {TokenType.TOK_KEYWORD_ADD, (2, FlowByte.InstructionType.INST_ADD)},
+        {TokenType.TOK_KEYWORD_SUB, (2, FlowByte.InstructionType.INST_SUB)},
+        {TokenType.TOK_KEYWORD_MUL, (2, FlowByte.InstructionType.INST_MUL)},
+        {TokenType.TOK_KEYWORD_DIV, (2, FlowByte.InstructionType.INST_DIV)},
+        {TokenType.TOK_KEYWORD_MOD, (2, FlowByte.InstructionType.INST_MOD)}
     }
 
     'Constructor
