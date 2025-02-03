@@ -41,6 +41,8 @@ def main
     :end
 ```
 
+---
+
 Chaque fonction possède ses propres "registres" de 32 bits, chacun peut être accédé avec $n où n est le registre. Avant d'appeler une fonction (`call`) ou une interruption (`int`), il est nécessaire de passer les arguments nécessaires via l'utilisation de l'instruction `arg`. Enfin, une valeur peut être retournée via le registre global `?ret`, modifié via l'instruction `retval`.
 
 Création et utilisation d'une fonction `getBirthYear` qui prend en argument l'âge et renvoie la date de naissance :
@@ -57,6 +59,8 @@ def getBirthYear 1
     retval ?ret
 ```
 
+---
+
 Enfin, voici un exemple de calcul de la suite de Fibonacci par récursivité. Une fonction `printlist` permettra d'écrire tous les nombres de la liste jusqu'au nombre passé en argument via une boucle.
 ```asm
 def main
@@ -64,24 +68,24 @@ def main
     call printlist
 
 def printlist 1
-	mov 1, 0
-	:loop
-
-	arg $1
-	call fibonacci
-
-	arg ?ret
-	int PUTI
-
-	arg '\n'
-	int PUTC
-
-	equ $1, $0
-	jmpif endloop, ?ret
-
-	inc 1
-	jmp loop
-	:endloop
+    mov 1, 0
+    :loop
+    
+    arg $1
+    call fibonacci
+    
+    arg ?ret
+    int PUTI
+    
+    arg '\n'
+    int PUTC
+    
+    equ $1, $0
+    jmpif endloop, ?ret
+    
+    inc 1
+    jmp loop
+    :endloop
 
 def fibonacci 1
     lt $0, 0
@@ -134,6 +138,6 @@ fbc fibo.txt fibo
 ```
 
 Execution :
-```
+```sh
 fb fibo
 ```
