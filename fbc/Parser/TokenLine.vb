@@ -40,8 +40,14 @@ Public Class TokenLine
             'Read line
             Dim Line As String = StreamReader.ReadLine().Trim()
 
+            'Remove comments
+            If Line.Contains(";"c) Then
+                Line = Line.Substring(0, Line.IndexOf(";"c))
+            End If
+            Line = Line.Trim()
+
             'Pass if empty or comment
-            If Line = "" Or Line.StartsWith(";") Then
+            If Line = "" Then
                 Continue Do
             End If
 
